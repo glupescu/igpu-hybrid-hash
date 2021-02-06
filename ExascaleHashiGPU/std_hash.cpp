@@ -18,8 +18,9 @@ void StdHash::reserve(int size) {
 	hash.reserve(size);
 }
 
-void StdHash::insert(int key, int value) {
+bool StdHash::insert(int key, int value) {
 	hash.insert(hash_t::value_type(key, value));
+	return true;
 }
 
 int StdHash::get(int key) {

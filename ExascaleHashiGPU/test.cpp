@@ -12,6 +12,7 @@
 #include <chrono>
 #include <array>
 #include <errno.h>
+#include <set>
 
 #include "hash.h"
 
@@ -34,20 +35,26 @@ void fillRandom(vector<int>& vecKeys, vector<int>& vecValues, int numEntries) {
 
 	//int interval = (numeric_limits<int>::max() / numEntries) - 1;
 	int interval = 0;
-	default_random_engine generator;
-	uniform_int_distribution<int> distribution(1, 200);
 
-	for (int i = 0; i < numEntries; i++) {
-		vecKeys.push_back(interval * i + distribution(generator));
-		vecValues.push_back(interval * i + distribution(generator));
-	}
+	//uniform_int_distribution<uint32_t> distribution(1, INT32_MAX);
+	uniform_int_distribution<uint32_t> distribution(1, numEntries * 10);
+	set<uint32_t> results;
 
 	// TODO improve
 	std::random_device rd;
-	std::mt19937 g(rd());
+	std::mt19937 generator(rd());
 
-	shuffle(vecKeys.begin(), vecKeys.end(), g);
-	shuffle(vecValues.begin(), vecValues.end(), g);
+	while (results.size() != numEntries) {
+		results.insert(distribution(generator));
+	}
+
+	for (auto &n : results) {
+		vecKeys.push_back(n);
+		vecValues.push_back(n + 10);
+	}
+
+	//shuffle(vecKeys.begin(), vecKeys.end(), g);
+	//shuffle(vecValues.begin(), vecValues.end(), g);
 }
 
 int main(int argc, char** argv)
@@ -62,7 +69,7 @@ int main(int argc, char** argv)
 	int* valuesGot = NULL;
 
 	if (argc == 1) {
-		numKeys = 20;
+		numKeys = 100;
 		numChunks = 1;
 	} else {
 		DIE(argc != 3,
@@ -92,6 +99,7 @@ int main(int argc, char** argv)
 
 		auto begin = chrono::high_resolution_clock::now();
 
+		
 		cout << "K: ";
 		for (int i = chunk_start; i < chunkSize; i++) {
 			cout << vecKeys[i] << " ";

@@ -4,7 +4,7 @@
 
 class Hash {
 public:
-	virtual void insert(int key, int value) = 0;
+	virtual bool insert(int key, int value) = 0;
 	virtual int get(int key) = 0;
 	virtual void remove(int key) = 0;
 	virtual void reserve(int num) = 0;
@@ -21,7 +21,7 @@ class StdHash : Hash {
 	hash_t hash;
 public:
 	void reserve(int size);
-	void insert(int key, int value);
+	bool insert(int key, int value);
 
 	int get(int key);
 	void remove(int key);
@@ -33,9 +33,24 @@ public:
 
 #define BUCKET_SIZE		4
 
-struct Bucket {
-	int keys[BUCKET_SIZE];
-	int values[BUCKET_SIZE];
+union Item {
+	uint64_t raw;
+
+	struct {
+		uint32_t key;
+		uint32_t value;
+	} data;
+};
+
+struct Work {
+
+	Work(uint64_t* items, int num) {
+		this->items = items;
+		this->num = num;
+	}
+
+	uint64_t* items;
+	int num;
 };
 
 class HybridHash : Hash {
@@ -46,18 +61,24 @@ public:
 	sycl::queue *q_gpu;
 	sycl::queue *q_cpu;
 
-	Bucket* bdata;
-	int		bnum;
+	Item*	idata;
+	sycl::atomic<bool>* idata_at;
+	int		inum;
 
 	void print(void);
 
 	void reserve(int bnum = 10);
-	void insert(int key, int value);
+	bool insert(int key, int value);
+	bool insert(uint64_t item, int lvl = 0);
 
 	int get(int key);
 	void remove(int key);
 
 	void insert_batch(int* keys, int* values, int num);
+
+	Work insert_gpu(Work work);
+	Work insert_cpu(Work work);
+
 	int* get_batch(int* keys, int num);
 	float get_load_factor(void);
 };
