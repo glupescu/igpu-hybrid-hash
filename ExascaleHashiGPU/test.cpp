@@ -69,7 +69,7 @@ int main(int argc, char** argv)
 	int* valuesGot = NULL;
 
 	if (argc == 1) {
-		numKeys = 100;
+		numKeys = 100000;
 		numChunks = 1;
 	} else {
 		DIE(argc != 3,
@@ -99,12 +99,11 @@ int main(int argc, char** argv)
 
 		auto begin = chrono::high_resolution_clock::now();
 
-		
-		cout << "K: ";
-		for (int i = chunk_start; i < chunkSize; i++) {
-			cout << vecKeys[i] << " ";
-		}
-		cout << std::endl;
+		//cout << "K: ";
+		//for (int i = chunk_start; i < chunkSize; i++) {
+		//	cout << vecKeys[i] << " ";
+		//}
+		//cout << std::endl;
 
 		// insert stage
 		hash->insert_batch(keys_start, values_start, chunkSize);
@@ -117,7 +116,6 @@ int main(int argc, char** argv)
 			<< "us, " << 100.f * hash->get_load_factor() << endl;
 	}
 
-	/*
 	for (int chunk_start = 0; chunk_start < numKeys; chunk_start += chunkSize) {
 
 		int* keys_start = &vecKeys[chunk_start];
@@ -152,7 +150,6 @@ int main(int argc, char** argv)
 			exit(1);
 		}
 	}
-	*/
 
 	return 0;
 }

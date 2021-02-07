@@ -40,6 +40,16 @@ union Item {
 		uint32_t key;
 		uint32_t value;
 	} data;
+
+	Item() {
+		this->data.key = -1;
+		this->data.value = 0;
+	}
+
+	Item(int key, int value) {
+		this->data.key = key;
+		this->data.value = value;
+	}
 };
 
 struct Work {
@@ -65,13 +75,15 @@ public:
 	sycl::atomic<bool>* idata_at;
 	int		inum;
 
+	float c_lfactor;
+	float t_lfactor;
+
 	void print(void);
 
 	void reserve(int bnum = 10);
 	bool insert(int key, int value);
 	bool insert(uint64_t item, int lvl = 0);
 
-	int get(int key);
 	void remove(int key);
 
 	void insert_batch(int* keys, int* values, int num);
@@ -79,6 +91,8 @@ public:
 	Work insert_gpu(Work work);
 	Work insert_cpu(Work work);
 
+	int get(int key);
 	int* get_batch(int* keys, int num);
+	int* get_batch2(int* keys, int num);
 	float get_load_factor(void);
 };
